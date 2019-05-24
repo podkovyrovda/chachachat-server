@@ -1,12 +1,10 @@
 const User    = require('./User'),
-      Room    = require('./Room'),
-      Palette = require('./Palette');
+      Room    = require('./Room');
 
 module.exports = class Chat {
   constructor() {
     this._users = [];
     this._rooms = [];
-    this._palette = new Palette();
   }
 
   createUser(name) {
@@ -22,6 +20,13 @@ module.exports = class Chat {
 
     const room = new Room(id);
     this.rooms.push(room);
+
+    room.palette.baseColors = [
+      '#ABCAF5', '#ABF5D6', '#D6ABF5',
+      '#CAF5AB', '#EFF5AB'
+    ];
+    room.palette.defaultColor = '#ABCAF5';
+
     return room
   }
 
@@ -29,18 +34,18 @@ module.exports = class Chat {
     if (!userName) return;
     const user = this.createUser(userName);
     const room = this.createRoom(roomId);
-    const color = this.palette.getRandom();
+    const color = room.palette.getRandom();
     (roomId) ? user.room = roomId : user.room = room.id;
     room.join({ id: user.id, name: user.name, color });
     return { user, room, color}
   }
 
-  leave(userId, roomId) {
+  leave(userId, roomId, color) {
     const i = this.users.findIndex(user => user.id === userId);
     (i >= 0) && this.users.splice(i, 1);
     const j = this.rooms.findIndex(room => room.id === roomId);
     const room = this.rooms[j];
-    (room) && room.leave(userId);
+    (room) && room.leave(userId, color);
   }
 
   get users() {
@@ -49,9 +54,5 @@ module.exports = class Chat {
 
   get rooms() {
     return this._rooms
-  }
-
-  get palette() {
-    return this._palette;
   }
 };

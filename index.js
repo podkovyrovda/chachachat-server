@@ -57,10 +57,10 @@ io.on(e.CONNECTION, (socket) => {
   // socket.on(e.RECONNECT, () => userJoined = false);
 
   socket.on(e.DISCONNECT, () => {
-    const { user } = socket;
+    const { user, color } = socket;
     if (!user) return;
 
-    chat.leave(user.id, user.room, user.color);
+    chat.leave(user.id, user.room, color);
     socket.to(user.room).emit(e.USER_LEFT, {
       user: {
         name: user.name
@@ -72,8 +72,3 @@ io.on(e.CONNECTION, (socket) => {
 });
 
 const chat = new Chat();
-chat.palette.baseColors = [
-  '#ABCAF5', '#ABF5D6', '#D6ABF5',
-  '#CAF5AB', '#EFF5AB'
-];
-chat.palette.defaultColor = '#ABCAF5';
