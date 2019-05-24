@@ -1,4 +1,4 @@
-const shortid = require('shortid');
+const nanoid = require('nanoid');
 
 module.exports = class Room {
   constructor(id) {
@@ -6,13 +6,13 @@ module.exports = class Room {
     this._users = [];
 
     if (!id) {
-      this.id = shortid.generate();
+      this.id = nanoid(6);
     }
   }
 
-  join({ id, name }) {
+  join({ id, name, color }) {
     const i = this.users.findIndex(user => user.id === id);
-    (i < 0) && this.users.push({ id, name });
+    (i < 0) && this.users.push({ id, name, color });
   }
 
   leave(userId) {

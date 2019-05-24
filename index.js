@@ -6,23 +6,19 @@ const io = new Server(5000);
 
 // Event listeners
 io.on(e.CONNECTION, (socket) => {
-  let userJoined = false;
-
   socket.on(e.JOIN_USER, (userName, roomId) => {
-    console.log(e.JOIN_USER);
-    const { user, room } = chat.join(userName, roomId);
-    socket.room = room;
+    const { user, room, color } = chat.join(userName, roomId);
 
-    if (!userJoined) {
-      socket.user = user;
-      socket.join(user.room);
-      userJoined = true;
-    }
+    socket.room = room;
+    socket.user = user;
+    socket.color = color;
+    socket.join(user.room);
 
     io.to(user.room).emit(e.USER_JOINED, {
       user: {
         id: user.id,
         name: user.name,
+        color,
         room: user.room
       },
       users: room.users
@@ -30,24 +26,26 @@ io.on(e.CONNECTION, (socket) => {
   });
 
   socket.on(e.NEW_MESSAGE, (message) => {
-    console.log(e.NEW_MESSAGE);
-    io.to(message.room).emit(e.MESSAGE_RECEIVED, {
+    const { user, room, body } = message;
+    const { color } = socket;
+    io.to(room).emit(e.MESSAGE_RECEIVED, {
       user: {
-        id: message.user.id,
-        name: message.user.name
+        id: user.id,
+        name: user.name
       },
-      message: message.body,
+      body,
+      color,
       timestamp: new Date().getTime()
     });
   });
 
   socket.on(e.START_TYPING, () => {
-    const { user } = socket;
-    if (!user) return;
-    io.to(user.room).emit(e.START_TYPING, {
-        name: user.name,
-        id: user.id
-    });
+    if (!socket.user) return;
+
+    const { name, id, room } = socket.user;
+    const { color } = socket;
+
+    io.to(room).emit(e.START_TYPING, { name, id, color });
   });
 
   socket.on(e.STOP_TYPING, () => {
@@ -59,18 +57,23 @@ io.on(e.CONNECTION, (socket) => {
   // socket.on(e.RECONNECT, () => userJoined = false);
 
   socket.on(e.DISCONNECT, () => {
-    console.log(e.DISCONNECT);
     const { user } = socket;
     if (!user) return;
 
-    chat.leave(user.id, user.room);
+    chat.leave(user.id, user.room, user.color);
     socket.to(user.room).emit(e.USER_LEFT, {
       user: {
         name: user.name
       },
+      color: socket.color,
       users: socket.room.users
     });
   });
 });
 
 const chat = new Chat();
+chat.palette.baseColors = [
+  '#ABCAF5', '#ABF5D6', '#D6ABF5',
+  '#CAF5AB', '#EFF5AB'
+];
+chat.palette.defaultColor = '#ABCAF5';

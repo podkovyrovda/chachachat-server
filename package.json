@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "shortid": "^2.2.14",
+    "nanoid": "^2.0.3",
     "socket.io": "^2.2.0"
   }
 }
