@@ -61,13 +61,14 @@ io.on(e.CONNECTION, (socket) => {
     if (!user) return;
 
     chat.leave(user.id, user.room, color);
-    socket.to(user.room).emit(e.USER_LEFT, {
+    io.to(user.room).emit(e.USER_LEFT, {
       user: {
         name: user.name
       },
       color: socket.color,
       users: socket.room.users
     });
+    io.to(user.room).emit(e.STOP_TYPING, user.id);
   });
 });
 
